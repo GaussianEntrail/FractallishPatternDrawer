@@ -27,6 +27,8 @@
 			
 			const RandomNumbersArray = (w = 2, h = 2) => Array(h).fill(0).map( r => Array(w).fill(0).map( c => Math.random() ) );
 			
+			const RandomNumbersArrayBias = (w = 2, h = 2, b = 0.5) => Array(h).fill(0).map( r => Array(w).fill(0).map( c => Math.random() > b ? 1 : 0 ) );
+			
 			const idiv = (a, b) => Math.floor(a / b);
 			
 			const ArrayEnlarge = (arr, w_factor, h_factor) => {
@@ -77,7 +79,7 @@
 						shade = mapRange(val, min, max, 0, 255);
 						
 						ctx.fillStyle = `rgb(${shade},${shade},${shade})`
-						ctx.fillRect(r*1, c*1, 1, 1);
+						ctx.fillRect(r*2, c*2, 2, 2);
 					}
 				));
 			};
@@ -85,6 +87,7 @@
 			const doThing = () => {
 				let arr = RandomNumbersArray(5,5);
 				arr =  ArraySquare( ArraySquare(arr) );
+				//arr = ArrayEnlarge(arr, 50, 50);
 				
 				drawGrid(arr);
 			};
