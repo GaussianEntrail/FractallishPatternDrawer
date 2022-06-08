@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<title>Generates fractal-like patterns based on an initial seed</title>
 		<style>
-			body: {
+			body {
 				background-color: black;
 				color: white;
 			}
@@ -29,18 +29,20 @@
 			
 			const idiv = (a, b) => Math.floor(a / b);
 			
-			const ArraySquare = (arr) => {
+			const ArrayEnlarge = (arr, w_factor, h_factor) => {
 				let h = arr.length;
 				let w = arr[0].length;
-				let new_h = h * h;
-				let new_w = w * w;
+				let new_h = h * h_factor;
+				let new_w = w * w_factor;
 				
 				return Array(new_h).fill(0).map(
 					(_, r) => Array(new_w).fill(0).map(
 						(_, c) => arr[r % h][c % w] * arr[ idiv(r, h) % h][ idiv(c, w) % w ]
 					)
 				);
-			}
+			};
+			
+			const ArraySquare = (arr) => ArrayEnlarge(arr, arr[0].length, arr.length);
 			
 			const findGridMinMax = (arr) => { 
 				let min = 1;
@@ -57,10 +59,9 @@
 				let range = max - min;
 				
 				return {Min: min, Max: max, Range: range};
-			}
+			};
 			
 			const mapRange = (value, range1_min, range1_max, range2_min, range2_max) => range2_min + ( ( (value - range1_min) / (range1_max - range1_min) ) * (range2_max - range2_min) );
-			
 			
 			const drawGrid = (arr) => {
 				let x = findGridMinMax(arr);
@@ -79,14 +80,14 @@
 						ctx.fillRect(r*1, c*1, 1, 1);
 					}
 				));
-			}
+			};
 			
 			const doThing = () => {
 				let arr = RandomNumbersArray(5,5);
 				arr =  ArraySquare( ArraySquare(arr) );
 				
 				drawGrid(arr);
-			}
+			};
 			
 			doThing();
 		</script>
