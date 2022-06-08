@@ -85,8 +85,9 @@
 			};
 			
 			const doThing = () => {
-				let arr = RandomNumbersArray(5,5);
-				arr =  ArraySquare( ArraySquare(arr) );
+				let arr = RandomNumbersArray(4,4);
+				//let arr = RandomNumbersArrayBias(4,4);
+				arr =  ArrayEnlarge( ArraySquare( ArraySquare(arr) ), 2, 2);
 				//arr = ArrayEnlarge(arr, 50, 50);
 				
 				drawGrid(arr);
