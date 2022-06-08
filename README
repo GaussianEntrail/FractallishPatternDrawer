@@ -1,0 +1,4 @@
+Generates a small N x N grid of numbers from 0 to 1
+Uses this to generate a larger grid of numbers
+Uses this new grid to draw a pattern on the canvas
+(Will explain in greater detail later)
