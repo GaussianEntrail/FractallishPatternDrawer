@@ -13,10 +13,19 @@
 	<body>
 		<ul>
 			<li>Generates a small N x N grid of numbers from 0 to 1</li>
-			<li>Uses this to generate a N<sup>2</sup> x N<sup>2</sup> grid of numbers</li>
-			<li>Uses this new grid to draw a pattern on the canvas</li>
-			<li>(Will explain in greater detail later)</li>
+			<li>Uses this to generate a larger grid of numbers (by default a N<sup>2</sup> x N<sup>2</sup> grid)</li>
+			<li>Uses this new grid to draw pixels on the canvas, with the largest number corresponding to a white pixel and the lowest number corresponding to 0</li>
 		</ul>
+		<br>
+		<ul>
+			<li><label for='gridWidth'>Grid Width:</label><input type="number" id='gridWidth'></li>
+			<li><label for='gridHeight'>Grid Height:</label><input type="number" id='gridHeight'></li>
+			<li><label for='gridWidthScale'>Grid Width multiplier:</label><input type="number" id='gridWidthScale'></li>
+			<li><label for='gridHeightScale'>Grid Height multiplier:</label><input type="number" id='gridHeightScale'></li>
+			<li><label for='blackWhite'>Monochrome:</label><input type="checkbox" id='blackWhite'></li>
+		</ul>
+		<br>
+			<input type="button" value="UPDATE" onclick="Update()"></input>
 		<br>
 		<canvas id='c' width = 800 height = 600></canvas>
 		
@@ -65,35 +74,78 @@
 			
 			const mapRange = (value, range1_min, range1_max, range2_min, range2_max) => range2_min + ( ( (value - range1_min) / (range1_max - range1_min) ) * (range2_max - range2_min) );
 			
-			const drawGrid = (arr) => {
+			const makeColorArray = (arr) => {
+				let w = arr[0].length;
+				let h = arr.length;
 				let x = findGridMinMax(arr);
 				let max = x.Max;
 				let min = x.Min;
 				let range = x.Range;
-				let shade = 255;
-				let val = 1;
+			
+			
+				return Array(h).fill(0).map( (_,r) => Array(w).fill(0).map(
+					(_, c) => 
+						mapRange(arr[r][c], min, max, 0, 255)		
+					) 
+				);
+			}
+			
+			const drawGrid = (arr) => {
+				ctx.fillStyle = 'black';
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+				
+				let _w = idiv(canvas.width, arr[0].length);
+				let _h = idiv(canvas.height, arr.length);
 			
 				arr.map( (_, r) => arr[r].map( (_,c) =>
 					{
-						val = arr[r][c];
-						shade = mapRange(val, min, max, 0, 255);
-						
-						ctx.fillStyle = `rgb(${shade},${shade},${shade})`
-						ctx.fillRect(r*2, c*2, 2, 2);
+						ctx.fillStyle = `rgb(${arr[r][c]}, ${arr[r][c]}, ${arr[r][c]})`;
+						ctx.fillRect(r*_w, c*_h, _w, _h);
 					}
 				));
 			};
 			
-			const doThing = () => {
-				let arr = RandomNumbersArray(4,4);
-				//let arr = RandomNumbersArrayBias(4,4);
-				arr =  ArrayEnlarge( ArraySquare( ArraySquare(arr) ), 2, 2);
-				//arr = ArrayEnlarge(arr, 50, 50);
-				
-				drawGrid(arr);
+			
+			
+			
+			
+			let arr = RandomNumbersArray();
+			let arr_width = 8;
+			let arr_height = 8;
+			let arr_wscale = 2;
+			let arr_hscale = 2;
+			let BW = false;
+			
+			const getBooleanValueOfInput = (inputID, defaultValue = false) => {
+				return document.getElementById(inputID).checked;
 			};
 			
-			doThing();
+			const getNumericalValueOfInput = (inputID, defaultValue = 0) => { 
+				let getNum = parseInt( document.getElementById(inputID).value );
+				return isNaN(getNum) ? defaultValue : getNum;				
+			};
+			
+			const draw = () => {
+				arr = (BW) ? RandomNumbersArrayBias(arr_width,arr_height) : RandomNumbersArray(arr_width,arr_height);
+				arr =  ArrayEnlarge( ArraySquare(arr) , arr_wscale, arr_hscale);
+				
+				color_arr = makeColorArray(arr);
+				
+				drawGrid(color_arr);
+			};
+			
+			const Update = () => {
+				arr_width = getNumericalValueOfInput('gridWidth', 8);
+				arr_height= getNumericalValueOfInput('gridHeight', 8);
+				arr_wscale = getNumericalValueOfInput('gridWidthScale', 2);
+				arr_hscale= getNumericalValueOfInput('gridHeightScale', 2);
+				BW = getBooleanValueOfInput('blackWhite', false);
+				draw();
+			};
+			
+
+			
+			Update();
 		</script>
 	</body>
 </html>
