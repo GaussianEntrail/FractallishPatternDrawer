@@ -23,13 +23,18 @@
 			<li><label for='gridWidthScale'>Grid Width multiplier:</label><input type="number" id='gridWidthScale'></li>
 			<li><label for='gridHeightScale'>Grid Height multiplier:</label><input type="number" id='gridHeightScale'></li>
 			<li><label for='blackWhite'>Monochrome:</label><input type="checkbox" id='blackWhite'></li>
+			<li><label for='stretchTile'>Tiled (leave off for Stretched):</label><input type="checkbox" id='stretchTile'></li>
 		</ul>
 		<br>
+			Pressing "Update" randomizes the grid and applies new width/height/multiplier values.
+			"Redraw" lets you switch from Stretched to Tiled mode.
 			<input type="button" value="UPDATE" onclick="Update()"></input>
+			<input type="button" value="REDRAW" onclick="Redraw()"></input>
 		<br>
 		<canvas id='c' width = 800 height = 800></canvas>
 		
 		<script>
+		
 			const canvas = document.querySelector('#c');
 			
 			const ctx = canvas.getContext('2d');
@@ -90,7 +95,7 @@
 				);
 			}
 			
-			const drawGrid = (arr) => {
+			const drawGridStretched = (arr) => {
 				ctx.fillStyle = 'black';
 				ctx.fillRect(0, 0, canvas.width, canvas.height);
 				
@@ -105,16 +110,30 @@
 				));
 			};
 			
+			const drawGridTiled = (arr) => {
+				ctx.fillStyle = 'black';
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+				let h = arr.length;
+				let w = arr[0].length;
+				
+				Array(canvas.height).fill(0).map( (_, r) => Array(canvas.width).fill(0).map( 
+					(_, c) => {
+						let shade = arr[r % h][ c % w];
+						ctx.fillStyle = `rgb(${shade}, ${shade}, ${shade})`;
+						ctx.fillRect(r, c, 1, 1);
+					}
+				));
 			
-			
-			
-			
+			}
+
 			let arr = RandomNumbersArray();
+			let color_arr = makeColorArray(arr);
 			let arr_width = 8;
 			let arr_height = 8;
 			let arr_wscale = 2;
 			let arr_hscale = 2;
 			let BW = false;
+			let Tiled = false;
 			
 			const getBooleanValueOfInput = (inputID, defaultValue = false) => {
 				return document.getElementById(inputID).checked;
@@ -125,13 +144,21 @@
 				return isNaN(getNum) ? defaultValue : getNum;				
 			};
 			
-			const draw = () => {
-				arr = (BW) ? RandomNumbersArrayBias(arr_width,arr_height) : RandomNumbersArray(arr_width,arr_height);
-				arr =  ArrayEnlarge( ArraySquare(arr) , arr_wscale, arr_hscale);
+			const draw = (newArray = true) => {
+			
+				if (newArray) {
+					arr = (BW) ? RandomNumbersArrayBias(arr_width,arr_height) : RandomNumbersArray(arr_width,arr_height);
+					arr =  ArrayEnlarge( ArraySquare(arr) , arr_wscale, arr_hscale);
+					
+					color_arr = makeColorArray(arr);
+				}
 				
-				color_arr = makeColorArray(arr);
-				
-				drawGrid(color_arr);
+				if (!Tiled) { drawGridStretched(color_arr); } else { drawGridTiled(color_arr); }
+			};
+			
+			const Redraw = () => {
+				Tiled = getBooleanValueOfInput('stretchTile', false);
+				draw(false);
 			};
 			
 			const Update = () => {
@@ -140,10 +167,9 @@
 				arr_wscale = getNumericalValueOfInput('gridWidthScale', 2);
 				arr_hscale= getNumericalValueOfInput('gridHeightScale', 2);
 				BW = getBooleanValueOfInput('blackWhite', false);
-				draw();
+				Tiled = getBooleanValueOfInput('stretchTile', false);
+				draw(true);
 			};
-			
-
 			
 			Update();
 		</script>
