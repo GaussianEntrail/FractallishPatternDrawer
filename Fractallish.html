@@ -26,8 +26,8 @@
 			<ul>
 				<li><label for='gridWidth'>Grid Width:</label><input type="number" value = 8 id='gridWidth'></li>
 				<li><label for='gridHeight'>Grid Height:</label><input type="number" value = 8 id='gridHeight'></li>
-				<li><label for='gridWidthScale'>Grid Width multiplier:</label><input type="number" value = 2 id='gridWidthScale'></li>
-				<li><label for='gridHeightScale'>Grid Height multiplier:</label><input type="number" value = 2 id='gridHeightScale'></li>
+				<li><label for='gridWidthScale'>Grid Width multiplier:</label><input type="number" value = 8 id='gridWidthScale'></li>
+				<li><label for='gridHeightScale'>Grid Height multiplier:</label><input type="number" value = 8 id='gridHeightScale'></li>
 				<li><label for='blackWhite'>Monochrome:</label><input type="checkbox" id='blackWhite'></li>
 				<li><label for='stretchTile'>Tiled (leave off for Stretched):</label><input type="checkbox" id='stretchTile'></li>
 			</ul>
@@ -136,8 +136,8 @@
 			let arr = RandomNumbersArray();
 			let arr_width = 8;
 			let arr_height = 8;
-			let arr_wscale = 2;
-			let arr_hscale = 2;
+			let arr_wscale = 8;
+			let arr_hscale = 8;
 			let BW = false;
 			let Tiled = false;
 			
@@ -219,7 +219,7 @@
 			
 				if (newArray) {
 					arr = (BW) ? RandomNumbersArrayBias(arr_width,arr_height) : RandomNumbersArray(arr_width,arr_height);
-					arr =  ArrayEnlarge( ArraySquare(arr) , arr_wscale, arr_hscale);
+					arr =  ArrayEnlarge( arr , arr_wscale, arr_hscale);
 				}
 				
 				color_arr = makeColorArray(arr);
