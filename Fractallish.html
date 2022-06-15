@@ -167,8 +167,8 @@
 				ctx.fillStyle = 'black';
 				ctx.fillRect(0, 0, canvas.width, canvas.height);
 				
-				let _w = idiv(canvas.width, arr[0].length);
-				let _h = idiv(canvas.height, arr.length);
+				let _w = clamp(idiv(canvas.width, arr[0].length), 1, canvas.width);
+				let _h = clamp(idiv(canvas.height, arr.length), 1, canvas.height);
 			
 				arr.map( (_, r) => arr[r].map( (_,c) =>
 					{
