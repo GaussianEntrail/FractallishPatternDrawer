@@ -40,11 +40,13 @@
 				<label for='start_r'>R</label><input type="number" value = 0 id='start_r'>
 				<label for='start_g'>G</label><input type="number" value = 0 id='start_g'>
 				<label for='start_b'>B</label><input type="number" value = 0 id='start_b'>
+				<label for='randomiseColor_start'>Randomize (this will override your input):</label><input type="checkbox" id='randomiseColor_start'>
 			<br>
 			<em>END COLOR</em><br>
 				<label for='end_r'>R</label><input type="number" value = 255 id='end_r'>
 				<label for='end_g'>G</label><input type="number" value = 255 id='end_g'>
 				<label for='end_b'>B</label><input type="number" value = 255 id='end_b'>
+				<label for='randomiseColor_end'>Randomize (this will override your input):</label><input type="checkbox" id='randomiseColor_end'>
 			
 		</div>
 		<br>
@@ -94,6 +96,8 @@
 				return new rgbColor(r, g, b);
 			};
 			
+			const randomColor = () => new rgbColor(Math.floor( Math.random() * 255 ), Math.floor( Math.random() * 255 ), Math.floor( Math.random() * 255 ) )
+			
 			const idiv = (a, b) => Math.floor(a / b);
 			
 			const ArrayEnlarge = (arr, w_factor, h_factor) => {
@@ -142,6 +146,9 @@
 			let BW = false;
 			let Tiled = false;
 			let doSmoothing = false;
+			
+			let randomStartColor = false;
+			let randomEndColor = false;
 			
 			let start_color = new rgbColor(0, 0, 0);
 			let end_color = new rgbColor(255, 255, 255);
@@ -234,17 +241,38 @@
 			};
 			
 			const getColorsFromFields = () => {
-				let r1 = getNumericalValueOfInput('start_r', 0);
-				let g1 = getNumericalValueOfInput('start_g', 0);
-				let b1 = getNumericalValueOfInput('start_b', 0);
+			
+				randomStartColor = getBooleanValueOfInput('randomiseColor_start', false);
+				randomEndColor = getBooleanValueOfInput('randomiseColor_end', false);
+			
+				if (!randomStartColor) {
+					let r1 = getNumericalValueOfInput('start_r', 0);
+					let g1 = getNumericalValueOfInput('start_g', 0);
+					let b1 = getNumericalValueOfInput('start_b', 0);
+					
+					start_color = new rgbColor(r1, g1, b1);
+				} else {
+					start_color = randomColor();
+				}
 				
-				let r2 = getNumericalValueOfInput('end_r', 0);
-				let g2 = getNumericalValueOfInput('end_g', 0);
-				let b2 = getNumericalValueOfInput('end_b', 0);
 				
-				start_color = new rgbColor(r1, g1, b1);
-				end_color = new rgbColor(r2, g2, b2);
+				if (!randomEndColor) {
+					let r2 = getNumericalValueOfInput('end_r', 0);
+					let g2 = getNumericalValueOfInput('end_g', 0);
+					let b2 = getNumericalValueOfInput('end_b', 0);
+					
+					end_color = new rgbColor(r2, g2, b2);
+				}
+				else { 
+					end_color = randomColor();
+				}
+				
+				
 			};
+			
+			
+			
+			
 			
 			const draw = (newArray = true) => {
 			
