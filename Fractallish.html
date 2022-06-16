@@ -60,9 +60,6 @@
 		<canvas id='c' width = 800 height = 800></canvas>
 		
 		<script>
-		
-			
-		
 			const canvas = document.querySelector('#c');
 			
 			const ctx = canvas.getContext('2d');
@@ -96,8 +93,10 @@
 				return new rgbColor(r, g, b);
 			};
 			
-			const randomColor = () => new rgbColor(Math.floor( Math.random() * 255 ), Math.floor( Math.random() * 255 ), Math.floor( Math.random() * 255 ) )
+			const randInt = (n = 255) => Math.floor( Math.random() * n )
 			
+			const randomColor = () => new rgbColor(randInt(), randInt(), randInt() )
+				
 			const idiv = (a, b) => Math.floor(a / b);
 			
 			const ArrayEnlarge = (arr, w_factor, h_factor) => {
@@ -172,8 +171,6 @@
 			
 			let color_arr = makeColorArray(arr);
 
- 
-
 			const smoothing = (arr) => {
 				//average out values of arrays
 				let h = arr.length;
@@ -198,8 +195,6 @@
 				
 				return arr2;
 			};
-			
-
 
 			const drawGridStretched = (arr) => {
 				ctx.fillStyle = 'black';
@@ -244,35 +239,33 @@
 			
 				randomStartColor = getBooleanValueOfInput('randomiseColor_start', false);
 				randomEndColor = getBooleanValueOfInput('randomiseColor_end', false);
+				
+				let r1, g1, b1, r2, g2, b2;
+			
 			
 				if (!randomStartColor) {
-					let r1 = getNumericalValueOfInput('start_r', 0);
-					let g1 = getNumericalValueOfInput('start_g', 0);
-					let b1 = getNumericalValueOfInput('start_b', 0);
-					
-					start_color = new rgbColor(r1, g1, b1);
+					r1 = getNumericalValueOfInput('start_r', 0);
+					g1 = getNumericalValueOfInput('start_g', 0);
+					b1 = getNumericalValueOfInput('start_b', 0);
 				} else {
-					start_color = randomColor();
+					r1 = randInt(); document.querySelector('#start_r').value = r1;
+					g1 = randInt(); document.querySelector('#start_g').value = g1;
+					b1 = randInt(); document.querySelector('#start_b').value = b1;
 				}
-				
+				start_color = new rgbColor(r1, g1, b1);
 				
 				if (!randomEndColor) {
-					let r2 = getNumericalValueOfInput('end_r', 0);
-					let g2 = getNumericalValueOfInput('end_g', 0);
-					let b2 = getNumericalValueOfInput('end_b', 0);
-					
-					end_color = new rgbColor(r2, g2, b2);
+					r2 = getNumericalValueOfInput('end_r', 0);
+					g2 = getNumericalValueOfInput('end_g', 0);
+					b2 = getNumericalValueOfInput('end_b', 0);
 				}
 				else { 
-					end_color = randomColor();
+					r2 = randInt(); document.querySelector('#end_r').value = r2;
+					g2 = randInt(); document.querySelector('#end_g').value = g2;
+					b2 = randInt(); document.querySelector('#end_b').value = b2;
 				}
-				
-				
+				end_color = new rgbColor(r2, g2, b2);
 			};
-			
-			
-			
-			
 			
 			const draw = (newArray = true) => {
 			
