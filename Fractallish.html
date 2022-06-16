@@ -30,6 +30,7 @@
 				<li><label for='gridHeightScale'>Grid Height multiplier:</label><input type="number" value = 8 id='gridHeightScale'></li>
 				<li><label for='blackWhite'>Monochrome:</label><input type="checkbox" id='blackWhite'></li>
 				<li><label for='stretchTile'>Tiled (leave off for Stretched):</label><input type="checkbox" id='stretchTile'></li>
+				<li><label for='doSmooth'>Averaging:</label><input type="checkbox" id='doSmooth'></li>
 			</ul>
 		</div>
 		<br>
@@ -140,6 +141,7 @@
 			let arr_hscale = 8;
 			let BW = false;
 			let Tiled = false;
+			let doSmoothing = false;
 			
 			let start_color = new rgbColor(0, 0, 0);
 			let end_color = new rgbColor(255, 255, 255);
@@ -162,6 +164,35 @@
 			}
 			
 			let color_arr = makeColorArray(arr);
+
+ 
+
+			const smoothing = (arr) => {
+				//average out values of arrays
+				let h = arr.length;
+				let w = arr[0].length;
+				
+				//let get = (r, c) => arr[(r + h) % h][(c + w) % w]
+				
+				arr2 = Array(h).fill(0).map( (_,r) => Array(w).fill(0).map( 
+					(_,c) => 
+						0.125 * ( 
+							arr[(r + 1 + h) % h][(c + w) % w] 
+							+ arr[(r - 1 + h) % h][(c + w) % w] 
+							+ arr[(r + h) % h][(c + 1 + w) % w] 
+							+ arr[(r + h) % h][(c - 1 + w) % w]
+							
+							+ arr[(r + 1 + h) % h][(c + 1 + w) % w] 
+							+ arr[(r + 1 + h) % h][(c - 1 + w) % w] 
+							+ arr[(r - 1 + h) % h][(c + 1 + w) % w] 
+							+ arr[(r - 1 + h) % h][(c - 1 + w) % w]
+						)
+				) );
+				
+				return arr2;
+			};
+			
+
 
 			const drawGridStretched = (arr) => {
 				ctx.fillStyle = 'black';
@@ -222,13 +253,14 @@
 					arr =  ArrayEnlarge( arr , arr_wscale, arr_hscale);
 				}
 				
-				color_arr = makeColorArray(arr);
+				color_arr = doSmoothing ? makeColorArray( smoothing(arr) ) : makeColorArray(arr);
 				
 				if (!Tiled) { drawGridStretched(color_arr); } else { drawGridTiled(color_arr); }
 			};
 			
 			const Redraw = () => {
 				Tiled = getBooleanValueOfInput('stretchTile', false);
+				doSmoothing = getBooleanValueOfInput('doSmooth', false);
 				getColorsFromFields();
 				draw(false);
 			};
@@ -239,7 +271,7 @@
 				arr_wscale = getNumericalValueOfInput('gridWidthScale', 2);
 				arr_hscale= getNumericalValueOfInput('gridHeightScale', 2);
 				BW = getBooleanValueOfInput('blackWhite', false);
-				
+				doSmoothing = getBooleanValueOfInput('doSmooth', false);
 				getColorsFromFields();
 				
 				
