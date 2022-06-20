@@ -40,7 +40,7 @@
 			<ul>
 				<li><label for='blackWhite'>Monochrome:</label><input type="checkbox" id='blackWhite'></li>
 				<li><label for='stretchTile'>Tiled (leave off for Stretched):</label><input type="checkbox" id='stretchTile'></li>
-				<li><label for='doSmoothing'>Averaging:</label><input type="checkbox" id='doSmoothing'></li>
+				<li><label for='doAveraging'>Averaging:</label><input type="checkbox" id='doAveraging'></li>
 			</ul>
 		</div>
 		<br>
@@ -79,10 +79,18 @@
 			
 			const ctx = canvas.getContext('2d');
 			
+			//USEFUL CONSTANT
 			const tau = Math.PI * 2;
 			
+			//GENERATE A RANDOM INTEGER BETWEEN 0 AND N
+			const randInt = (N = 255) => Math.floor( Math.random() * N ) % N;
+			
+			//INTEGER DIVISION
+			const idiv = (a, b) => (a / b)|0; //Math.floor(a / b );
+			
+			//INTERPOLATION/CLAMPING FUNCTIONS
 			const clamp = (value, min, max) => (value < min) ? min : (value > max) ? max : value;
-
+			
 			const lerp = (t, v0, v1) => (t <= 0.0) ? v0 : (t >= 1.0) ? v1 : (v1 * t) + (v0 * (1 - t));
 			
 			const smoothstep = (t, v0, v1) => (v1 - v0) * (3.0 - t * 2.0) * t * t + v0;
@@ -91,6 +99,7 @@
 			
 			const mapRange = (value, min1, max1, min2, max2) => lerp( (value - min1) / (max1 - min1) , min2, max2);
 
+			//NOT USED
 			const specialNumbersArray = (w = 2, h = 2, f1 = Math.sin, f2 = Math.sin ) => Array(h).fill(0).map( (_,r) => Array(w).fill(0).map( 
 				(_,c) => {
 					let x_t = mapRange(c, 0, w, 0, tau);
@@ -102,44 +111,16 @@
 				}
 			) );
 			
+			//GENERATE A 2D ARRAY OF RANDOM NUMBERS [0 ~ 1]
 			const RandomNumbersArray = (w = 2, h = 2) => Array(h).fill(0).map( r => Array(w).fill(0).map( c => Math.random() ) );
 			
-			const biasArray = (arr, bias = 0.5) => Array( arr.length ).fill(0).map( (_,r) => 
-				Array(arr[r].length).fill(0).map( 
-					(_,c) => arr[r][c] > bias ? 1 : 0
-			) );
+			//VALUES ARE ONLY 0 OR 1
+			const biasArray = (arr, bias = 0.5) => Array( arr.length ).fill(0).map( (_,r) => Array(arr[r].length).fill(0).map(  (_,c) => arr[r][c] > bias ? 1 : 0 ) );
 			
+			//CONVERT AN ARRAY INTO A "BIASED" ONE
 			const RandomNumbersArrayBias = (w = 2, h = 2, b = 0.5) => Array(h).fill(0).map( r => Array(w).fill(0).map( c => Math.random() > b ? 1 : 0 ) );		
 			
-			class rgbColor {
-				constructor(r, g, b) {
-					this.r = Math.floor(clamp(r, 0, 255));
-					this.g = Math.floor(clamp(g, 0, 255));
-					this.b = Math.floor(clamp(b, 0, 255));
-				}
-				color() {
-					return `rgb(${this.r},${this.g},${this.b})`;
-				}
-			}		
-			
-			// generate a color that's "between" two colors
-			const colorBetween = (value, start_color, end_color, interpolate_func = lerp) => {
-				if (value >= 1) {return end_color;}
-				else if (value <= 0) {return start_color;}
-				
-				let r = interpolate_func(value, start_color.r, end_color.r);
-				let g = interpolate_func(value, start_color.g, end_color.g);
-				let b = interpolate_func(value, start_color.b, end_color.b);
-				
-				return new rgbColor(r, g, b);
-			};
-			
-			const randInt = (n = 255) => Math.floor( Math.random() * n )
-			
-			const randomColor = () => new rgbColor(randInt(), randInt(), randInt() );
-			
-			const idiv = (a, b) => Math.floor(a / b);
-			
+			//"ENLARGE" AN ARRAY
 			const ArrayEnlarge = (arr, w_factor, h_factor) => {
 				let h = arr.length;
 				let w = arr[0].length;
@@ -153,8 +134,10 @@
 				);
 			};
 			
+			//ENLARGE AN ARRAY BY IT'S OWN WIDTH AND HEIGHT
 			const ArraySquare = (arr) => ArrayEnlarge(arr, arr[0].length, arr.length);
 			
+			//FIND THE MINIMUM AND MAXIMUM VALUE IN A 2D ARRAY
 			const findGridMinMax = (arr) => { 
 				let min = 1;
 				let max = 0;
@@ -173,15 +156,43 @@
 				return {Min: min, Max: max, Range: range};
 			};
 			
-			//Parameters			
+			//COLOR CLASS
+			class rgbColor {
+				constructor(r, g, b) {
+					this.r = Math.floor(clamp(r, 0, 255));
+					this.g = Math.floor(clamp(g, 0, 255));
+					this.b = Math.floor(clamp(b, 0, 255));
+				}
+				color() {
+					return `rgb(${this.r},${this.g},${this.b})`;
+				}
+			}		
+			
+			//GENERATE A COLOR THAT'S "BETWEEN" TWO OTHER COLORS (MAYBE SWITCH FROM RGB TO HSV LATER?)
+			const colorBetween = (value, start_color, end_color, interpolate_func = lerp) => {
+				if (value >= 1) {return end_color;}
+				else if (value <= 0) {return start_color;}
+				
+				let r = interpolate_func(value, start_color.r, end_color.r);
+				let g = interpolate_func(value, start_color.g, end_color.g);
+				let b = interpolate_func(value, start_color.b, end_color.b);
+				
+				return new rgbColor(r, g, b);
+			};
+			
+			//GENERATE A RANDOM RGB COLOR
+			const randomColor = () => new rgbColor(randInt(), randInt(), randInt() );
+			
+			//PARAMETERS			
 			let arr = RandomNumbersArray();
 			let arr_width = 8;
 			let arr_height = 8;
 			let arr_wscale = 8;
 			let arr_hscale = 8;
+			
 			let blackWhite = false;
 			let Tiled = false;
-			let doSmoothing = false;
+			let doAveraging = false;
 			let doRandomNumbers = true;
 			
 			let randomStartColor = false;
@@ -192,6 +203,7 @@
 			let start_color = new rgbColor(0, 0, 0);
 			let end_color = new rgbColor(255, 255, 255);
 			
+			//GENERATE AN ARRAY OF COLORS FOR DRAWING
 			const makeColorArray = (arr, interpolate_func = lerp) => {
 				let w = arr[0].length;
 				let h = arr.length;
@@ -211,17 +223,17 @@
 			
 			let color_arr = makeColorArray(arr);
 
-			const smoothing = (arr) => {
+			//AVERAGE OUT VALUES IN GRID WITH THEIR EIGHT NEIGHBORS
+			const average = (arr) => {
 				//average out values of arrays
 				let h = arr.length;
 				let w = arr[0].length;
-				
 				//let get = (r, c) => arr[(r + h) % h][(c + w) % w]
-				
 				arr2 = Array(h).fill(0).map( (_,r) => Array(w).fill(0).map( 
 					(_,c) => 
-						0.125 * ( 
-							arr[(r + 1 + h) % h][(c + w) % w] 
+						( 
+							arr[r % h][c % w] 
+							+ arr[(r + 1 + h) % h][(c + w) % w] 
 							+ arr[(r - 1 + h) % h][(c + w) % w] 
 							+ arr[(r + h) % h][(c + 1 + w) % w] 
 							+ arr[(r + h) % h][(c - 1 + w) % w]
@@ -230,12 +242,12 @@
 							+ arr[(r + 1 + h) % h][(c - 1 + w) % w] 
 							+ arr[(r - 1 + h) % h][(c + 1 + w) % w] 
 							+ arr[(r - 1 + h) % h][(c - 1 + w) % w]
-						)
+						) / 9
 				) );
-				
 				return arr2;
 			};
 
+			//DRAW GRID STRETCHED OUT TO FIT THE CANVAS
 			const drawGridStretched = (arr) => {
 				ctx.fillStyle = 'black';
 				ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -251,6 +263,7 @@
 				));
 			};
 			
+			//TILE THE GRID ACROSS THE CANVAS
 			const drawGridTiled = (arr) => {
 				ctx.fillStyle = 'black';
 				ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -266,6 +279,7 @@
 			
 			}	
 			
+			//GET PARAMETERS/INPUT VALUES
 			const getBooleanValueOfInput = (inputID, defaultValue = false) => {
 				return document.getElementById(inputID).checked;
 			};
@@ -318,7 +332,8 @@
 				return lerp;
 			}
 			
-			const draw = (newArray = true) => {
+			//DRAWING
+			const Draw = (newArray = true) => {
 				
 				let _arr = null;
 				let colorSmoothingFunc = colorSmoothingFuncSelect();
@@ -333,18 +348,18 @@
 				_arr =  ArrayEnlarge( _arr , arr_wscale, arr_hscale);				
 				
 				
-				color_arr = doSmoothing ? makeColorArray( smoothing(_arr), colorSmoothingFunc ) : makeColorArray( _arr, colorSmoothingFunc );
+				color_arr = doAveraging ? makeColorArray( average(_arr), colorSmoothingFunc ) : makeColorArray( _arr, colorSmoothingFunc );
 				
 				if (!Tiled) { drawGridStretched(color_arr); } else { drawGridTiled(color_arr); }
 			};
 			
 			const Redraw = () => {
 				Tiled = getBooleanValueOfInput('stretchTile', false);
-				doSmoothing = getBooleanValueOfInput('doSmoothing', false);
+				doAveraging = getBooleanValueOfInput('doAveraging', false);
 				blackWhite = getBooleanValueOfInput('blackWhite', false);
 				getColorsFromFields();
 				
-				draw(false);
+				Draw(false);
 			};
 			
 			const Update = () => {
@@ -358,11 +373,11 @@
 				
 				
 				blackWhite = getBooleanValueOfInput('blackWhite', false);
-				doSmoothing = getBooleanValueOfInput('doSmoothing', false);
+				doAveraging = getBooleanValueOfInput('doAveraging', false);
 				Tiled = getBooleanValueOfInput('stretchTile', false);
 				getColorsFromFields();
 				
-				draw(true);
+				Draw(true);
 			};
 			
 			Update();
