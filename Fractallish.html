@@ -47,15 +47,15 @@
 			<div class = "settingsBox colorsBox">
 			<em>Color settings</em>
 			<em>START COLOR</em><br> 
-				<label for='start_r'>R</label><input type="number" value = 0 id='start_r'>
-				<label for='start_g'>G</label><input type="number" value = 0 id='start_g'>
-				<label for='start_b'>B</label><input type="number" value = 0 id='start_b'>
+				<label for='start_h'>H</label><input type="number" value = 0 id='start_h'><br>
+				<label for='start_s'>S</label><input type="number" value = 0 id='start_s'>%<br>
+				<label for='start_l'>L</label><input type="number" value = 0 id='start_l'>%<br>
 				<label for='randomiseColor_start'>Randomize (this will override your input):</label><input type="checkbox" id='randomiseColor_start'>
 			<br>
 			<em>END COLOR</em><br>
-				<label for='end_r'>R</label><input type="number" value = 255 id='end_r'>
-				<label for='end_g'>G</label><input type="number" value = 255 id='end_g'>
-				<label for='end_b'>B</label><input type="number" value = 255 id='end_b'>
+				<label for='end_h'>H</label><input type="number" value = 0 id='end_h'><br>
+				<label for='end_s'>S</label><input type="number" value = 0 id='end_s'>%<br>
+				<label for='end_l'>L</label><input type="number" value = 100 id='end_l'>%<br>
 				<label for='randomiseColor_end'>Randomize (this will override your input):</label><input type="checkbox" id='randomiseColor_end'>
 			<br>
 			<em>INTERPOLATION TYPE</em><br>
@@ -157,14 +157,16 @@
 			};
 			
 			//COLOR CLASS
-			class rgbColor {
-				constructor(r, g, b) {
-					this.r = Math.floor(clamp(r, 0, 255));
-					this.g = Math.floor(clamp(g, 0, 255));
-					this.b = Math.floor(clamp(b, 0, 255));
+			class hslColor {
+				constructor(h, s, l) {
+					this.h = Math.floor(clamp(h, 0, 360));
+					this.s = Math.floor(clamp(s, 0, 100));
+					this.l = Math.floor(clamp(l, 0, 100));
 				}
+				
 				color() {
-					return `rgb(${this.r},${this.g},${this.b})`;
+					//return `rgb(${this.r},${this.g},${this.b})`;
+					return 'hsl('+this.h+','+this.s+'%,'+this.l+'%)';
 				}
 			}		
 			
@@ -173,15 +175,15 @@
 				if (value >= 1) {return end_color;}
 				else if (value <= 0) {return start_color;}
 				
-				let r = interpolate_func(value, start_color.r, end_color.r);
-				let g = interpolate_func(value, start_color.g, end_color.g);
-				let b = interpolate_func(value, start_color.b, end_color.b);
+				let h = interpolate_func(value, start_color.h, end_color.h);
+				let s = interpolate_func(value, start_color.s, end_color.s);
+				let l = interpolate_func(value, start_color.l, end_color.l);
 				
-				return new rgbColor(r, g, b);
+				return new hslColor(h, s, l);
 			};
 			
-			//GENERATE A RANDOM RGB COLOR
-			const randomColor = () => new rgbColor(randInt(), randInt(), randInt() );
+			//GENERATE A RANDOM HSL COLOR
+			const randomColor = () => new hslColor( randInt(360), randInt(100), randInt(100) );
 			
 			//PARAMETERS			
 			let arr = RandomNumbersArray();
@@ -200,8 +202,8 @@
 			let smoothingFunction = lerp;
 			
 			
-			let start_color = new rgbColor(0, 0, 0);
-			let end_color = new rgbColor(255, 255, 255);
+			let start_color = new hslColor(0, 0, 0);
+			let end_color = new hslColor(0, 0, 100);
 			
 			//GENERATE AN ARRAY OF COLORS FOR DRAWING
 			const makeColorArray = (arr, interpolate_func = lerp) => {
@@ -294,33 +296,34 @@
 				randomStartColor = getBooleanValueOfInput('randomiseColor_start', false);
 				randomEndColor = getBooleanValueOfInput('randomiseColor_end', false);
 				
-				let r1, g1, b1, r2, g2, b2;
+				let h1, s1, l1, h2, s2, l2;
 			
 			
 				if (!randomStartColor) {
-					r1 = getNumericalValueOfInput('start_r', 0);
-					g1 = getNumericalValueOfInput('start_g', 0);
-					b1 = getNumericalValueOfInput('start_b', 0);
+					h1 = getNumericalValueOfInput('start_h', 0);
+					s1 = getNumericalValueOfInput('start_s', 0);
+					l1 = getNumericalValueOfInput('start_l', 0);
 				} else {
-					r1 = randInt(); document.querySelector('#start_r').value = r1;
-					g1 = randInt(); document.querySelector('#start_g').value = g1;
-					b1 = randInt(); document.querySelector('#start_b').value = b1;
+					h1 = randInt(360); document.querySelector('#start_h').value = h1;
+					s1 = randInt(100); document.querySelector('#start_s').value = s1;
+					l1 = randInt(100); document.querySelector('#start_l').value = l1;
 				}
-				start_color = new rgbColor(r1, g1, b1);
+				start_color = new hslColor(h1, s1, l1);
 				
 				if (!randomEndColor) {
-					r2 = getNumericalValueOfInput('end_r', 0);
-					g2 = getNumericalValueOfInput('end_g', 0);
-					b2 = getNumericalValueOfInput('end_b', 0);
+					h2 = getNumericalValueOfInput('end_h', 0);
+					s2 = getNumericalValueOfInput('end_s', 0);
+					l2 = getNumericalValueOfInput('end_l', 0);
 				}
 				else { 
-					r2 = randInt(); document.querySelector('#end_r').value = r2;
-					g2 = randInt(); document.querySelector('#end_g').value = g2;
-					b2 = randInt(); document.querySelector('#end_b').value = b2;
+					h2 = randInt(360); document.querySelector('#end_h').value = h2;
+					s2 = randInt(100); document.querySelector('#end_s').value = s2;
+					l2 = randInt(100); document.querySelector('#end_l').value = l2;
 				}
-				end_color = new rgbColor(r2, g2, b2);
+				end_color = new hslColor(h2, s2, l2);
 			};
 			
+			//FUNCTION USED TO GET "IN-BETWEEN" COLORS
 			const colorSmoothingFuncSelect = () => {
 				let select = 0; //default
 				let optns = document.querySelectorAll('input[name ="smoothing"]');
