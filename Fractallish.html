@@ -23,19 +23,29 @@
 		</ul>
 		<br>
 		<div class = "settingsBox">
+			<em>Properties of Number grid</em>
 			<ul>
 				<li><label for='gridWidth'>Grid Width:</label><input type="number" value = 8 id='gridWidth'></li>
 				<li><label for='gridHeight'>Grid Height:</label><input type="number" value = 8 id='gridHeight'></li>
 				<li><label for='gridWidthScale'>Grid Width multiplier:</label><input type="number" value = 8 id='gridWidthScale'></li>
 				<li><label for='gridHeightScale'>Grid Height multiplier:</label><input type="number" value = 8 id='gridHeightScale'></li>
+				<!-- <li><label for='doRandomNumbers'>Random numbers:</label><input type="checkbox" checked = true id='doRandomNumbers'></li> -->
+			
+			
+			<ul>
+		</div>
+		<br>
+		<div class = "settingsBox">
+			<em>Grid drawing settings</em>
+			<ul>
 				<li><label for='blackWhite'>Monochrome:</label><input type="checkbox" id='blackWhite'></li>
 				<li><label for='stretchTile'>Tiled (leave off for Stretched):</label><input type="checkbox" id='stretchTile'></li>
-				<li><label for='doSmooth'>Averaging:</label><input type="checkbox" id='doSmooth'></li>
+				<li><label for='doSmoothing'>Averaging:</label><input type="checkbox" id='doSmoothing'></li>
 			</ul>
 		</div>
 		<br>
 			<div class = "settingsBox colorsBox">
-			<p>Change which colors are used to generate the patterns</p>
+			<em>Color settings</em>
 			<em>START COLOR</em><br> 
 				<label for='start_r'>R</label><input type="number" value = 0 id='start_r'>
 				<label for='start_g'>G</label><input type="number" value = 0 id='start_g'>
@@ -64,11 +74,33 @@
 			
 			const ctx = canvas.getContext('2d');
 			
-			const RandomNumbersArray = (w = 2, h = 2) => Array(h).fill(0).map( r => Array(w).fill(0).map( c => Math.random() ) );
-			
-			const RandomNumbersArrayBias = (w = 2, h = 2, b = 0.5) => Array(h).fill(0).map( r => Array(w).fill(0).map( c => Math.random() > b ? 1 : 0 ) );
+			const tau = Math.PI * 2;
 			
 			const clamp = (value, min, max) => (value < min) ? min : (value > max) ? max : value;
+
+			const lerp = (t, v0, v1) => (v1 * clamp(t, 0, 1) ) + (v0 * (1 - clamp(t, 0, 1) ));
+			
+			const mapRange = (value, min1, max1, min2, max2) => lerp( (value - min1) / (max1 - min1) , min2, max2);
+
+			const specialNumbersArray = (w = 2, h = 2, f1 = Math.sin, f2 = Math.sin ) => Array(h).fill(0).map( (_,r) => Array(w).fill(0).map( 
+				(_,c) => {
+					let x_t = mapRange(c, 0, w, 0, tau);
+					let y_t = mapRange(r, 0, h, 0, tau);
+					let x = f1(x_t) + f1(2 * x_t) + f1(4 * x_t) + f1(8 * x_t) + f1(16 * x_t);
+					let y = f2(y_t) + f2(2 * y_t) + f2(4 * y_t) + f2(8 * y_t) + f2(16 * y_t);
+					
+					return x + y;
+				}
+			) );
+			
+			const RandomNumbersArray = (w = 2, h = 2) => Array(h).fill(0).map( r => Array(w).fill(0).map( c => Math.random() ) );
+			
+			const biasArray = (arr, bias = 0.5) => Array( arr.length ).fill(0).map( (_,r) => 
+				Array(arr[r].length).fill(0).map( 
+					(_,c) => arr[r][c] > bias ? 1 : 0
+			) );
+			
+			const RandomNumbersArrayBias = (w = 2, h = 2, b = 0.5) => Array(h).fill(0).map( r => Array(w).fill(0).map( c => Math.random() > b ? 1 : 0 ) );		
 			
 			class rgbColor {
 				constructor(r, g, b) {
@@ -95,8 +127,8 @@
 			
 			const randInt = (n = 255) => Math.floor( Math.random() * n )
 			
-			const randomColor = () => new rgbColor(randInt(), randInt(), randInt() )
-				
+			const randomColor = () => new rgbColor(randInt(), randInt(), randInt() );
+			
 			const idiv = (a, b) => Math.floor(a / b);
 			
 			const ArrayEnlarge = (arr, w_factor, h_factor) => {
@@ -132,19 +164,16 @@
 				return {Min: min, Max: max, Range: range};
 			};
 			
-			const lerp = (t, v0, v1) => (v1 * clamp(t, 0, 1) ) + (v0 * (1 - clamp(t, 0, 1) ));
-			
-			const mapRange = (value, min1, max1, min2, max2) => lerp( (value - min1) / (max1 - min1) , min2, max2);
-
 			//Parameters			
 			let arr = RandomNumbersArray();
 			let arr_width = 8;
 			let arr_height = 8;
 			let arr_wscale = 8;
 			let arr_hscale = 8;
-			let BW = false;
+			let blackWhite = false;
 			let Tiled = false;
-			let doSmoothing = false;
+			let doSmoothinging = false;
+			let doRandomNumbers = true;
 			
 			let randomStartColor = false;
 			let randomEndColor = false;
@@ -268,35 +297,47 @@
 			};
 			
 			const draw = (newArray = true) => {
-			
+				
+				let _arr = null;
+				
 				if (newArray) {
-					arr = (BW) ? RandomNumbersArrayBias(arr_width,arr_height) : RandomNumbersArray(arr_width,arr_height);
-					arr =  ArrayEnlarge( arr , arr_wscale, arr_hscale);
+					if (doRandomNumbers) { arr = RandomNumbersArray(arr_width,arr_height); }
+					else { arr = specialNumbersArray(arr_width, arr_height); }
 				}
 				
-				color_arr = doSmoothing ? makeColorArray( smoothing(arr) ) : makeColorArray(arr);
+				if (blackWhite) { _arr = biasArray(arr)} else {_arr = arr;}
+				
+				_arr =  ArrayEnlarge( _arr , arr_wscale, arr_hscale);				
+				
+				color_arr = doSmoothinging ? makeColorArray( smoothing(_arr) ) : makeColorArray(_arr);
 				
 				if (!Tiled) { drawGridStretched(color_arr); } else { drawGridTiled(color_arr); }
 			};
 			
 			const Redraw = () => {
 				Tiled = getBooleanValueOfInput('stretchTile', false);
-				doSmoothing = getBooleanValueOfInput('doSmooth', false);
+				doSmoothinging = getBooleanValueOfInput('doSmoothing', false);
+				blackWhite = getBooleanValueOfInput('blackWhite', false);
 				getColorsFromFields();
+				
 				draw(false);
 			};
 			
 			const Update = () => {
+				//doRandomNumbers = getBooleanValueOfInput('doRandomNumbers', false);
+			
 				arr_width = getNumericalValueOfInput('gridWidth', 8);
 				arr_height= getNumericalValueOfInput('gridHeight', 8);
 				arr_wscale = getNumericalValueOfInput('gridWidthScale', 2);
 				arr_hscale= getNumericalValueOfInput('gridHeightScale', 2);
-				BW = getBooleanValueOfInput('blackWhite', false);
-				doSmoothing = getBooleanValueOfInput('doSmooth', false);
+				
+				
+				
+				blackWhite = getBooleanValueOfInput('blackWhite', false);
+				doSmoothinging = getBooleanValueOfInput('doSmoothing', false);
+				Tiled = getBooleanValueOfInput('stretchTile', false);
 				getColorsFromFields();
 				
-				
-				Tiled = getBooleanValueOfInput('stretchTile', false);
 				draw(true);
 			};
 			
