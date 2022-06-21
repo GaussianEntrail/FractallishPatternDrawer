@@ -82,8 +82,8 @@
 			//USEFUL CONSTANT
 			const tau = Math.PI * 2;
 			
-			//GENERATE A RANDOM INTEGER BETWEEN 0 AND N
-			const randInt = (N = 255) => Math.floor( Math.random() * N ) % N;
+			//GENERATE A RANDOM INTEGER BETWEEN 0 AND N (inclusive)
+			const randInt = (N = 255) => Math.floor( Math.random() * N ) % (N + 1);
 			
 			//INTEGER DIVISION
 			const idiv = (a, b) => (a / b)|0; //Math.floor(a / b );
@@ -259,7 +259,7 @@
 			
 				arr.map( (_, r) => arr[r].map( (_,c) =>
 					{
-						ctx.fillStyle = arr[r][c].color() //`rgb(${arr[r][c]}, ${arr[r][c]}, ${arr[r][c]})`;
+						ctx.fillStyle = arr[r][c].color(); //`rgb(${arr[r][c]}, ${arr[r][c]}, ${arr[r][c]})`;
 						ctx.fillRect(c*_w, r*_h, _w, _h);
 					}
 				));
